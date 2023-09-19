@@ -51,6 +51,7 @@ class TwoByFourScreen(Screen):
         self.entry_dialog.dismiss()
 
     def on_pre_enter(self, *args):
+        self.data_table_row_num = 0
         app.current_drill = "twobyfours"
         app.update_session_id()
         # self.add_history()
@@ -130,11 +131,63 @@ class TwoByFourDialog(MDBoxLayout):
     def close_dialog(self):
         self.dismiss()
 
+class StarScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.current_scores = []
+        self.entry_dialog = None
+        self.data_table = None
+        self.data_table_row_num = 0
+        self.history_table = None
+
+    def on_pre_enter(self, *args):
+        self.data_table_row_num = 0
+        app.current_drill = "star"
+        app.update_session_id()
+        
+        if not self.data_table:
+            self.data_table = MDDataTable(
+                pos_hint={"center_y": 0.5, "center_x": 0.5},
+                use_pagination=False,
+                rows_num=20,
+                column_data=[
+                    ("Station", dp(20)),
+                    ("Target", dp(15)),
+                    ("Score", dp(15)),
+                    ("Notes", dp(50)),
+                ],
+                row_data=[],
+            )
+            self.ids.star_current_container.add_widget(self.data_table)
+        
+        #clear row_data when screen loads
+        self.data_table.row_data = []
+
+    def add_score(self, drill, session_id, score, distance,other=None):
+        
+        db.submit_score(drill, session_id, int(score.text), int(distance.value), None, None, other)
+        # self.close_dialog()
+        notes = f"{int(distance.value)}ft"
+        self.data_table.add_row((str(self.data_table_row_num + 1), "tbd", score.text, notes))
+        self.data_table_row_num += 1
+        pass 
+
+    def submit_session(self, **kwargs):
+        print("Session submitted")
+        pass 
+    
+    def pull_current_scores(self):
+        session_id = app.session_id
+        self.current_scores = db.get_session_scores('star', session_id)
+
+    pass
+
 # Create the screen manager
 sm = ScreenManager()
 sm.add_widget(MainScreen(name='main'))
 sm.add_widget(DrillsScreen(name='drills'))
 sm.add_widget(TwoByFourScreen(name='twobyfour'))
+sm.add_widget(StarScreen(name='star'))
 
 class MainApp(MDApp):
     current_drill = None

@@ -2,6 +2,7 @@ ScreenManager:
     MainScreen:
     DrillsScreen:
     TwoByFourScreen:
+    StarScreen:
 
 <MainScreen>:
     name: 'main'
@@ -49,6 +50,7 @@ ScreenManager:
                 TwoLineListItem:
                     text: 'Star Drill'
                     secondary_text: 'Short Putts Under Pressure'
+                    on_release: root.manager.current = 'star'
         MDRectangleFlatButton:
             text: 'Back'
             pos_hint: {'center_x':0.5,'center_y':0.1}
@@ -187,6 +189,96 @@ ScreenManager:
                         text: "SAVE"
                         size_hint: 0.2, None
                         on_release: app.root.get_screen("twobyfour").add_score('twobyfours', app.session_id, twobyfour_score, twobyfour_distance, twobyfour_club.current_active_segment or "PW", twobyfour_lie.current_active_segment or "Tight")
+            
+            MDBoxLayout:
+                orientation: 'horizontal'
+                spacing: "10dp"
+                MDRaisedButton:
+                    pos_hint: {'center_x': 0.5}
+                    text: "History & Analysis"
+                    size_hint: 0.2, None
+                    on_release: app.root.get_screen("twobyfour").add_score('twobyfours', app.session_id, twobyfour_score, twobyfour_distance, twobyfour_club.current_active_segment or "PW", twobyfour_lie.current_active_segment or "Tight")
+            
+
+<StarScreen>:
+    name: 'star'
+    MDBoxLayout:
+        id: star_main_container
+        orientation: "vertical"
+        
+        MDTopAppBar:
+            title : 'Star Drill'
+            left_action_items: [["arrow-left", lambda x: setattr(root.manager, 'current', 'drills')]]
+        MDLabel:
+            markup: True
+            text: 'Make as many consecutive putts without missing from a given distance. Setup 4-6 balls around the hole. [b] Score = Putts in a row without a miss'
+            font_style:  'Body2'
+            halign: 'left'
+            valign: 'top'
+            size_hint: 1, 0.05
+
+        MDBoxLayout:
+            orientation: "vertical"
+            size_hint: 1, 0.40
+            padding: "10dp"
+            
+            ScrollView:
+                size_hint: 1,1
+                do_scroll_x: False
+                MDBoxLayout:
+                    id: star_current_container
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            size_hint: 0.9, 0.4
+            padding: "10dp"
+                        
+            MDBoxLayout:
+                orientation: 'vertical'
+                spacing: "10dp"
+                MDLabel:
+                    text: 'Distance (ft)'
+                    bold: True
+                MDBoxLayout:
+                    orientation: 'horizontal'
+
+                    MDSlider:
+                        id: star_distance
+                        size_hint: 0.85, None
+                        hint: True
+                        min: 2
+                        max: 10
+                        value: 3
+                        step: 1
+                        hint_bg_color: app.theme_cls.primary_color
+                        hint_text_color: "white"
+                    MDLabel:
+                        text: str(int(star_distance.value)) + " ft"
+                        bold: True
+                        size_hint: 0.15, None
+                    
+            
+            MDBoxLayout:
+                orientation: 'vertical'
+                spacing: "10dp"
+                MDLabel:
+                    text: 'Score'
+                    bold: True
+            
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    MDTextField:
+                        id: star_score
+                        text: ''
+                        hint_text: "Consecutive Putts..."
+                        max_text_length: 2
+                        input_type: 'tel'
+                        input_filter: 'int'
+
+                    MDRaisedButton:
+                        text: "SAVE"
+                        size_hint: 0.2, None
+                        on_release: app.root.get_screen("star").add_score('star', app.session_id, star_score, star_distance); star_score.text = ''
 
 
 
