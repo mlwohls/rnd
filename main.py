@@ -59,6 +59,7 @@ class TwoByFourScreen(Screen):
             self.data_table = MDDataTable(
                 pos_hint={"center_y": 0.5, "center_x": 0.5},
                 use_pagination=False,
+                rows_num=20,
                 column_data=[
                     ("Station", dp(20)),
                     ("Target", dp(15)),
@@ -72,10 +73,16 @@ class TwoByFourScreen(Screen):
         #clear row_data when screen loads
         self.data_table.row_data = []
 
-    def add_score(self, drill, session_id, score, other=None):
-        db.submit_score(drill, session_id, int(score.value), other)
+    def add_score(self, drill, session_id, score, distance, club, lie, other=None):
+        if type(club) is not str:
+            club = club.text
+        if type(lie) is not str:
+            lie = lie.text
+        
+        db.submit_score(drill, session_id, int(score.value), int(distance.value), club, lie, other)
         # self.close_dialog()
-        self.data_table.add_row((str(self.data_table_row_num + 1), "4", score.value, ""))
+        notes = f"{club} | {lie} | {int(distance.value)}ft"
+        self.data_table.add_row((str(self.data_table_row_num + 1), "4", score.value, notes))
         self.data_table_row_num += 1
         pass 
 
