@@ -3,6 +3,50 @@ ScreenManager:
     DrillsScreen:
     TwoByFourScreen:
     StarScreen:
+    RouletteScreen:
+
+<PlusMinus>
+    orientation: 'horizontal'
+    size_hint: 1, None
+    MDIconButton:
+        icon: "minus-box-outline"
+        theme_icon_color: "Custom"
+        icon_color: "red"
+        icon_size: "30dp"
+        on_release: self.parent.minus()
+        #halign: 'left'
+        size_hint: 0.5, None
+    MDIconButton:
+        icon: "plus-box-outline"
+        theme_icon_color: "Custom"
+        icon_color: "green"
+        icon_size: "30dp"
+        on_release: self.parent.plus()
+        #halign: 'right'
+        size_hint: 0.5, None
+
+<RouletteCard>
+    line_color: "black"
+    style: "outlined"
+    value: 0
+    distance_text: 'Yep'
+    id: card
+    MDBoxLayout:
+        orientation: 'vertical'
+        MDLabel:
+            id: distance
+            halign: "center"
+            #text: ''
+            text: self.parent.parent.distance_text
+            bold: True
+        MDLabel:
+            id: score
+            halign: "center"
+            text: ''
+            text: str(self.parent.parent.value)
+            bold: True
+            font_style: "H4"
+        PlusMinus:
 
 <MainScreen>:
     name: 'main'
@@ -47,6 +91,10 @@ ScreenManager:
                     text: 'Two x Fours'
                     secondary_text: 'Up & Down Practice'
                     on_release: root.manager.current = 'twobyfour'
+                TwoLineListItem:
+                    text: 'Wedge Roulette'
+                    secondary_text: 'Learn & Improve Your Wedges'
+                    on_release: root.manager.current = 'roulette'
                 TwoLineListItem:
                     text: 'Star Drill'
                     secondary_text: 'Short Putts Under Pressure'
@@ -281,6 +329,155 @@ ScreenManager:
                         on_release: app.root.get_screen("star").add_score('star', app.session_id, star_score, star_distance); star_score.text = ''
 
 
+<RouletteScreen>:
+    name: 'roulette'
+    MDBoxLayout:
+        id: roulette_main_container
+        orientation: "vertical"
+        
+        MDTopAppBar:
+            title : 'Wedge Roulette'
+            left_action_items: [["arrow-left", lambda x: setattr(root.manager, 'current', 'drills')]]
+
+        MDBoxLayout:  #Main Container
+            id: main_container
+            orientation: 'vertical'
+
+            MDBoxLayout:  #Inputs
+                id: input_container
+                orientation: 'vertical'
+                size_hint: 1, 0.20
+                padding: "5dp", "1dp"
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDLabel:
+                        bold: True
+                        text: 'Station Attributes'
+                        font_style:  'H6'
+
+                    MDRaisedButton:
+                        id: auto_button
+                        text: "Roulette"
+                        on_release: root.auto_choose()
+                        
+                
+                MDGridLayout:
+                    rows: 2
+                    MDLabel:
+                        bold: True
+                        text: 'Club'
+                        font_style:  'Body1'
+                        halign: 'left'
+                    MDLabel:
+                        bold: True
+                        text: 'Surface'
+                        font_style:  'Body1'
+                        halign: 'left'
+                    MDLabel:
+                        bold: True
+                        text: 'Distance'
+                        font_style:  'Body1'
+                        halign: 'left'
+                    MDLabel:
+                        bold: True
+                        text: 'Carry'
+                        font_style:  'Body1'
+                        halign: 'left'
+                    MDLabel:
+                        bold: True
+                        text: 'Stance'
+                        font_style:  'Body1'
+                        halign: 'left'
+                    MDLabel:
+                        bold: True
+                        text: 'Break'
+                        font_style:  'Body1'
+                        halign: 'left'
+
+                    MDRaisedButton:
+                        id: club_button
+                        text: "--"
+                        on_release: root.club_menu.open()
+                        md_bg_color: "gray"
+                    MDRaisedButton:
+                        id: surface_button
+                        text: "--"
+                        on_release: root.surface_menu.open()
+                        md_bg_color: "gray"
+                    MDRaisedButton:
+                        id: distance_button
+                        text: "--"
+                        on_release: root.distance_menu.open()
+                        md_bg_color: "gray"
+                    MDRaisedButton:
+                        id: carry_button
+                        text: "--"
+                        on_release: root.carry_menu.open()
+                        md_bg_color: "gray"
+                    MDRaisedButton:
+                        id: stance_button
+                        text: "--"
+                        on_release: root.stance_menu.open()
+                        md_bg_color: "gray"
+                    MDRaisedButton:
+                        id: break_button
+                        text: "--"
+                        on_release: root.break_menu.open()
+                        md_bg_color: "gray"
+                    
+            MDBoxLayout: #Spacer
+                size_hint: None, 0.015
+               
+                    
+            MDBoxLayout: #Scores
+                orientation: 'vertical'
+                size_hint: 1.0, 0.30
+                MDLabel:
+                    bold: True
+                    text: 'Scores'
+                    font_style:  'H6'
+                    size_hint: 1, 0.2
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    padding: "5dp", "0dp"
+                    spacing: "5dp"
+
+                    RouletteCard:
+                        id: roulette_3
+                        distance_text: '< 3 ft'
+                        value: 0
+                    RouletteCard:
+                        id: roulette_6
+                        distance_text: '3-6 ft'
+                        value: 0  
+                    RouletteCard:
+                        id: roulette_9
+                        distance_text: '7-9 ft'
+                        value: 0  
+                    RouletteCard:
+                        id: roulette_12
+                        distance_text: '10 ft +'
+                        value: 0    
+
+            
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    size_hint: 1, 0.2
+                    MDRaisedButton:
+                        text: "SUBMIT"
+                        size_hint: 0.8, None
+                        on_release: root.submit_score()
+                
+            MDBoxLayout:  #Analysis
+                orientation: 'horizontal'
+                spacing: "10dp"
+                md_bg_color: "red"
+                size_hint: 1.0, 0.5
+                MDRaisedButton:
+                    text: "Wedge Analysis"
+                    size_hint: 0.2, None
+                    on_release: root.manager.current = 'wedges_analysis'
 
 
 
@@ -338,7 +535,7 @@ ScreenManager:
             MDLabel:
                 text: 'Lie'
                 bold: True
-            
+
             MDSegmentedControl:
                 id: twobyfour_lie
                 MDSegmentedControlItem:

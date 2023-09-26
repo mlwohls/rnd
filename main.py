@@ -7,6 +7,9 @@ from kivymd.uix.datatables.datatables import MDDataTable
 from kivy.properties import StringProperty
 from kivy.metrics import dp
 from kivymd.uix.label.label import MDLabel
+from kivymd.uix.menu import MDDropdownMenu
+import random
+from kivymd.uix.card import MDCard
 
 # from kivymd.uix.list import TwoLineAvatarIconListItem, ILeftBodyTouch
 from kivymd.uix.selectioncontrol import MDCheckbox
@@ -182,12 +185,153 @@ class StarScreen(Screen):
 
     pass
 
+class RouletteScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.current_scores = []
+        self.data_table = None
+        self.data_table_row_num = 0
+        self.history_table = None
+        self.clubs = ['GW', '52', '56', '60']
+        self.surfaces = ['Tight', 'Lt Rough', 'Hvy Rough',  'Sand']
+        self.distances = ["10ft", "20ft", "30ft", "40ft"]
+        self.carrys = ["0%","25%", "50%", "75%"]
+        self.stances = ["Flat", "Uphill", "Downhill"]
+        self.breaks = ["Flat", "Uphill", "Downhill"]
+        self.score_ids = ['roulette_3', 'roulette_6', 'roulette_9', 'roulette_12']
+        
+
+    def on_pre_enter(self, *args):
+        self.data_table_row_num = 0
+        app.current_drill = "roulette"
+        app.update_session_id()
+        
+        # if not self.data_table:
+        #     self.data_table = MDDataTable(
+        #         pos_hint={"center_y": 0.5, "center_x": 0.5},
+        #         use_pagination=False,
+        #         rows_num=20,
+        #         column_data=[
+        #             ("Station", dp(20)),
+        #             ("Target", dp(15)),
+        #             ("Score", dp(15)),
+        #             ("Notes", dp(50)),
+        #         ],
+        #         row_data=[],
+        #     )
+        #     self.ids.roulette_current_container.add_widget(self.data_table)
+        
+        # #clear row_data when screen loads
+        # self.data_table.row_data = []
+
+
+        self.club_menu = CustomMenu(self.clubs,self.ids.club_button)
+        self.surface_menu = CustomMenu(self.surfaces,self.ids.surface_button, width_mult=4)
+        self.distance_menu = CustomMenu(self.distances,self.ids.distance_button)
+        self.carry_menu = CustomMenu(self.carrys,self.ids.carry_button)
+        self.stance_menu = CustomMenu(self.stances,self.ids.stance_button)
+        self.break_menu = CustomMenu(self.breaks,self.ids.break_button)
+
+        self.menus = [self.club_menu, self.surface_menu, self.distance_menu, self.carry_menu, self.stance_menu, self.break_menu]
+        self.menu_fields = ['club', 'surface', 'distance', 'carry', 'stance', 'break']
+
+    def auto_choose(self):
+        for menu in self.menus:
+            item = random.choice(menu.items)
+            menu.callback(item['text'])
+
+        pass
+
+
+    def submit_score(self):
+
+        session_id = app.session_id
+        drill = 'roulette'
+        
+        #Need to capture ALL the Station + ALL the Scores from root
+
+        input_values = {'drill': drill, 'session_id': session_id}
+        for field, menu in zip(self.menu_fields, self.menus):
+            if field == 'break':
+                field = '_break'
+            input_values[field] = menu.caller.text
+            menu.caller.text = "--"
+        self.auto_choose()
+
+        # print(input_values)
+
+        scores = {}
+        for score_id in self.score_ids:
+            prox_value = int(score_id.split("_")[-1])
+            prox_str = f"{prox_value} ft"
+            input_values['prox'] = prox_str
+            score_widget = eval("self.ids."+score_id)
+            for i in range(score_widget.value):
+                db.submit_prox(**input_values)
+            score_widget.value = 0
+
+            
+        
+        pass 
+
+    def submit_session(self, **kwargs):
+        print("Session submitted")
+        pass 
+    
+    def pull_current_scores(self):
+        session_id = app.session_id
+        self.current_scores = db.get_session_scores('star', session_id)
+
+    pass
+
+
+class CustomMenu(MDDropdownMenu):
+    
+    def __init__(self, choices, caller, width_mult=2):
+
+        items = []
+        for c in choices:
+             temp = {
+                    "text": c,
+                    "viewclass": "OneLineListItem",
+                    "on_release": lambda x=c: self.callback(x),
+                }
+             items.append(temp)
+        super().__init__(caller=caller, items=items,width_mult=width_mult)
+    
+    def callback(self, x):
+        self.caller.text = x
+        self.dismiss()
+
+class PlusMinus(MDBoxLayout):
+
+    def plus(self):
+        self.parent.parent.value += 1
+    def minus(self):
+        if self.parent.parent.value > 0:
+            self.parent.parent.value -= 1
+        else:
+            pass
+
+    pass
+
+class RouletteCard(MDCard):
+    distance_text = StringProperty()
+    
+
+    def __init__(self, **kwargs):
+        super(RouletteCard,self).__init__(**kwargs)
+        
+        
+
+
 # Create the screen manager
 sm = ScreenManager()
 sm.add_widget(MainScreen(name='main'))
 sm.add_widget(DrillsScreen(name='drills'))
 sm.add_widget(TwoByFourScreen(name='twobyfour'))
 sm.add_widget(StarScreen(name='star'))
+sm.add_widget(RouletteScreen(name='roulette'))
 
 class MainApp(MDApp):
     current_drill = None
