@@ -168,10 +168,10 @@ class StarScreen(Screen):
 
     def add_score(self, drill, session_id, score, distance,other=None):
         
-        db.submit_score(drill, session_id, int(score.text), int(distance.value), None, None, other)
+        db.submit_score(drill, session_id, int(score.value), int(distance.value), None, None, other)
         # self.close_dialog()
         notes = f"{int(distance.value)}ft"
-        self.data_table.add_row((str(self.data_table_row_num + 1), "tbd", score.text, notes))
+        self.data_table.add_row((str(self.data_table_row_num + 1), "tbd", str(score.value), notes))
         self.data_table_row_num += 1
         pass 
 

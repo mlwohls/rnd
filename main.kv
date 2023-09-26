@@ -307,26 +307,43 @@ ScreenManager:
                     
             
             MDBoxLayout:
+                id: star_score
+                value: 0
                 orientation: 'vertical'
                 spacing: "10dp"
+
                 MDLabel:
                     text: 'Score'
                     bold: True
             
                 MDBoxLayout:
                     orientation: 'horizontal'
-                    MDTextField:
-                        id: star_score
-                        text: ''
-                        hint_text: "Consecutive Putts..."
-                        max_text_length: 2
-                        input_type: 'tel'
-                        input_filter: 'int'
+                    MDSlider:
+                        id: star_increment
+                        size_hint: 0.6, None
+                        hint: True
+                        min: 1
+                        max: 10
+                        value: 4
+                        step: 1
+                        hint_bg_color: app.theme_cls.primary_color
+                        hint_text_color: "white"
+                    
+                    MDRaisedButton:
+                        text: "Add " + str(root.ids.star_increment.value)
+                        size_hint: 0.2, None
+                        on_release: self.parent.parent.value += root.ids.star_increment.value
+                    
+                    MDLabel:
+                        text: str(star_score.value)
+                        bold: True
+                        font_style: "H4"
+                        size_hint: 0.1, None
 
                     MDRaisedButton:
-                        text: "SAVE"
+                        text: "Submit"
                         size_hint: 0.2, None
-                        on_release: app.root.get_screen("star").add_score('star', app.session_id, star_score, star_distance); star_score.text = ''
+                        on_release: app.root.get_screen("star").add_score('star', app.session_id, star_score, star_distance); star_score.value = 0
 
 
 <RouletteScreen>:
